@@ -94,7 +94,7 @@ export function ChatInterface({
   return (
     <div
       className={cn(
-        "flex flex-col h-full w-full bg-gray-900 text-white relative overflow-hidden",
+        "flex flex-col h-full w-full relative overflow-hidden",
         className
       )}
     >
@@ -123,7 +123,7 @@ export function ChatInterface({
                 </div>
               </div>
             ) : (
-              <div className="space-y-3 sm:space-y-4 w-full">
+              <div className="space-y-0 sm:space-y-4 w-full">
                 {messages.map((message, index) => (
                   <div
                     key={message.id || `message-${index}`}
@@ -142,7 +142,7 @@ export function ChatInterface({
                     />
                   </div>
                 ))}
-                <div className="h-4 sm:h-6" /> {/* Bottom spacing */}
+                {/* <div className="h-2 sm:h-2" /> Bottom spacing */}
               </div>
             )}
           </div>
@@ -155,7 +155,7 @@ export function ChatInterface({
               variant="secondary"
               size="sm"
               onClick={scrollToBottom}
-              className="rounded-full shadow-lg bg-gray-800 hover:bg-gray-700 text-white border-gray-700 text-xs sm:text-sm px-3 sm:px-4"
+              className="rounded-full shadow-lg text-xs sm:text-sm px-3 sm:px-4 border cursor-pointer"
             >
               <span className="hidden sm:inline">↓ Scroll to bottom</span>
               <span className="sm:hidden">↓</span>

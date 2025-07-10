@@ -71,7 +71,7 @@ export function ChatInput({
     setMessage(e.target.value);
   };
   return (
-    <div className="p-2 sm:p-4 bg-gray-900 w-full">
+    <div className="p-2 sm:p-4 w-full">
       <div className="max-w-4xl mx-auto flex flex-col items-center justify-center w-full">
         <form onSubmit={handleSubmit} className="relative w-full max-w-2xl">
           <Textarea
@@ -129,9 +129,11 @@ export function ChatInput({
         {/* Helper text */}
         <div className="flex items-center justify-center mt-1 sm:mt-2 text-xs text-gray-500 w-full">
           <span className="hidden sm:inline">
-            Press Enter to send, Shift+Enter for new line
+            NyayaMitra can make mistakes, so double-check it.
           </span>
-          <span className="sm:hidden">Enter to send</span>
+          <span className="sm:hidden">
+            NyayaMitra can make mistakes, so double-check.
+          </span>
         </div>
       </div>
     </div>

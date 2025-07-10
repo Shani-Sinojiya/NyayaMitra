@@ -1,7 +1,8 @@
 import React, { Fragment, Suspense } from "react";
-import Header from "../../header";
+import Header from "../../../header";
 import { notFound } from "next/navigation";
 import ClientWrapper from "./client-wrapper";
+import ChatLoader from "./chat-loader";
 
 // These Next.js config options ensure the page is always fetched fresh
 export const dynamic = "force-dynamic";
@@ -90,6 +91,45 @@ async function getChatById(id: string): Promise<ChatData | null> {
   }
 }
 
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ id: string }>;
+}) {
+  const chatId = (await params).id;
+
+  // If the ID is "new", we render an empty chat
+  if (chatId === "new") {
+    return {
+      title: "New Chat | Legal AI Assistant",
+      description:
+        "Start a new chat with our AI assistant to get answers to your questions, brainstorm ideas, or just have a conversation.",
+    };
+  }
+
+  // Fetch chat data for metadata
+  let chatData: ChatData = {
+    id: chatId,
+    title: "Legal AI Assistant",
+    messages: [],
+  };
+
+  try {
+    const fetchedData = await getChatById(chatId);
+    if (fetchedData) {
+      chatData = fetchedData;
+    }
+  } catch {
+    // Use default values if fetching fails
+  }
+
+  return {
+    title: chatData.title || "Legal AI Assistant",
+    description:
+      "Continue your conversation with our AI assistant. Ask questions, get legal advice, and more.",
+  };
+}
+
 const Page = async ({ params }: { params: Promise<{ id: string }> }) => {
   const chatId = (await params).id;
 
@@ -100,7 +140,11 @@ const Page = async ({ params }: { params: Promise<{ id: string }> }) => {
         <Header title="New Chat" />
         <div className="h-[calc(100vh-48px)] sm:h-[calc(100vh-56px)] w-full overflow-hidden">
           <Suspense
-            fallback={<div className="p-4">Loading chat interface...</div>}
+            fallback={
+              <div className="h-[calc(100vh-48px)] sm:h-[calc(100vh-56px)] w-full overflow-hidden">
+                <ChatLoader />
+              </div>
+            }
           >
             <ClientWrapper
               title="Legal AI Assistant"

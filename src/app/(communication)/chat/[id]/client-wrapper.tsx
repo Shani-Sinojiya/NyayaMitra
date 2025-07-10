@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import dynamic from "next/dynamic";
+import ChatLoader from "./chat-loader";
 
 // We dynamically import the SimpleClientChat component with SSR disabled
 // This ensures no React hooks are executed on the server
@@ -61,7 +62,11 @@ export default function ClientWrapper({
 
   // Show a loading state until the component is mounted
   if (!mounted) {
-    return <div className="p-4">Loading chat interface...</div>;
+    return (
+      <div className="h-[calc(100vh-48px)] sm:h-[calc(100vh-56px)] w-full overflow-hidden">
+        <ChatLoader />
+      </div>
+    );
   }
 
   // Only render the SimpleClientChat component once we're on the client

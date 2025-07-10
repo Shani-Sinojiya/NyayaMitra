@@ -15,7 +15,7 @@ interface Props {
 
 const Header = ({ title }: Props) => {
   return (
-    <header className="flex h-12 sm:h-14 shrink-0 items-center gap-2 border-b border-gray-700 bg-gray-900">
+    <header className="flex h-12 sm:h-14 shrink-0 items-center gap-2 border-b">
       <div className="flex flex-1 items-center gap-2 px-2 sm:px-3">
         <SidebarTrigger className="h-6 w-6 sm:h-8 sm:w-8" />
         <Separator
@@ -26,7 +26,7 @@ const Header = ({ title }: Props) => {
           <BreadcrumbList>
             <BreadcrumbItem>
               <BreadcrumbPage className="line-clamp-1">
-                <span className="text-sm sm:text-lg font-semibold text-white">
+                <span className="text-sm sm:text-lg font-semibold">
                   {title}
                 </span>
               </BreadcrumbPage>

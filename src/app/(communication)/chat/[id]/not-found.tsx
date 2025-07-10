@@ -1,5 +1,5 @@
 import React from "react";
-import Header from "../../header";
+import Header from "../../../header";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { AlertTriangle } from "lucide-react";

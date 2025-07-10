@@ -3,13 +3,12 @@ import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
 import { WEB_APP_NAME } from "@/constants/web";
 import { SessionProvider } from "next-auth/react";
 import { Metadata } from "next/types";
-import { Fragment, PropsWithChildren } from "react";
-import Header from "../header";
+import { PropsWithChildren } from "react";
 
 export const metadata: Metadata = {
-  title: "Voice Call | " + WEB_APP_NAME,
+  title: "Chat | " + WEB_APP_NAME,
   description:
-    "Start a new voice call with our AI assistant to get answers to your questions, brainstorm ideas, or just have a conversation.",
+    "Start a new chat with our AI assistant to get answers to your questions, brainstorm ideas, or just have a conversation.",
 };
 
 export default function Layout({ children }: PropsWithChildren) {
@@ -17,12 +16,7 @@ export default function Layout({ children }: PropsWithChildren) {
     <SessionProvider>
       <SidebarProvider>
         <AppSidebar />
-        <SidebarInset>
-          <Fragment>
-            <Header title="Voice Call" />
-            {children}
-          </Fragment>
-        </SidebarInset>
+        <SidebarInset>{children}</SidebarInset>
       </SidebarProvider>
     </SessionProvider>
   );

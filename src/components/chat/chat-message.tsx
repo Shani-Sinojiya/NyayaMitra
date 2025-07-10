@@ -54,7 +54,7 @@ export function ChatMessage({ message, isLoading }: ChatMessageProps) {
   return (
     <div
       className={cn(
-        "group relative flex items-start space-x-2 sm:space-x-3 px-1 sm:px-4 py-3 sm:py-6 w-full bg-gray-900",
+        "group relative flex items-start space-x-2 sm:space-x-3 px-1 sm:px-4 py-3 sm:py-6 w-full",
         isUser ? "justify-end" : "justify-start"
       )}
     >
@@ -87,7 +87,7 @@ export function ChatMessage({ message, isLoading }: ChatMessageProps) {
             "relative rounded-2xl px-3 py-2 sm:px-4 sm:py-3 shadow-lg min-w-0 w-full overflow-hidden",
             isUser
               ? "bg-blue-600 text-white ml-auto rounded-br-md"
-              : "bg-gray-800 text-gray-100 mr-auto rounded-bl-md border border-gray-700"
+              : "bg-primary/10 mr-auto rounded-bl-md border border-primary/20"
           )}
         >
           {isUser ? (
@@ -103,15 +103,15 @@ export function ChatMessage({ message, isLoading }: ChatMessageProps) {
           {/* Loading indicator */}
           {isLoading && isAssistant && (
             <div className="flex items-center space-x-1 mt-2">
-              <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce"></div>
+              <div className="w-2 h-2 rounded-full animate-bounce" />
               <div
-                className="w-2 h-2 bg-gray-400 rounded-full animate-bounce"
+                className="w-2 h-2 rounded-full animate-bounce"
                 style={{ animationDelay: "0.1s" }}
-              ></div>
+              />
               <div
-                className="w-2 h-2 bg-gray-400 rounded-full animate-bounce"
+                className="w-2 h-2 rounded-full animate-bounce"
                 style={{ animationDelay: "0.2s" }}
-              ></div>
+              />
             </div>
           )}
         </div>
@@ -153,7 +153,9 @@ export function ChatMessage({ message, isLoading }: ChatMessageProps) {
             <AvatarImage src={session.data.user.image} />
           ) : null}
           <AvatarFallback className="bg-blue-600 text-white">
-            <User className="h-3 w-3 sm:h-4 sm:w-4" />
+            {session.data?.user?.name
+              ? session.data.user.name.charAt(0).toUpperCase()
+              : "U"}
           </AvatarFallback>
         </Avatar>
       )}

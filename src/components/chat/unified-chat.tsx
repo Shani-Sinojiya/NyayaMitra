@@ -225,7 +225,7 @@ export function UnifiedChat({
   };
 
   return (
-    <div className="h-full w-full flex flex-col bg-gray-900 overflow-hidden">
+    <div className="h-full w-full flex flex-col overflow-hidden">
       {/* Error Alert */}
       {chat.error && (
         <div className="shrink-0 w-full">

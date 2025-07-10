@@ -1,5 +1,5 @@
 import React from "react";
-import Header from "../../header";
+import Header from "../../../header";
 import ChatLoader from "./chat-loader";
 
 export default function Loading() {

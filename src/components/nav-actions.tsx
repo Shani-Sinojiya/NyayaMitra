@@ -1,5 +1,5 @@
 "use client";
-import { useSession } from "next-auth/react";
+import { signOut, useSession } from "next-auth/react";
 import { Button } from "@/components/ui/button";
 import {
   Popover,
@@ -8,9 +8,8 @@ import {
 } from "@/components/ui/popover";
 import { useState } from "react";
 import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
-import { LogOut, Settings } from "lucide-react";
+import { LogOut } from "lucide-react";
 import Link from "next/link";
-import { Separator } from "./ui/separator";
 
 export function NavActions() {
   const session = useSession();
@@ -26,7 +25,9 @@ export function NavActions() {
                 <AvatarImage src={session.data.user.image} />
               ) : null}
               <AvatarFallback className="bg-muted text-muted-foreground">
-                NM
+                {session.data?.user?.name
+                  ? session.data.user.name.charAt(0).toUpperCase()
+                  : "U"}
               </AvatarFallback>
             </Avatar>
           </Button>
@@ -38,20 +39,12 @@ export function NavActions() {
           sideOffset={8}
         >
           <div className="w-48 rounded-md border bg-popover p-1 shadow-md grid grid-cols-1 gap-1">
-            <Button variant={"ghost"} asChild className="justify-start">
-              <Link href="/settings">
-                <Settings /> Settings
-              </Link>
-            </Button>
-            <Separator className="my-1" />
             <Button
               variant={"ghost"}
-              asChild
-              className="justify-start text-red-500 hover:bg-red-200 hover:text-red-800"
+              className="justify-start text-red-500 hover:bg-red-200 hover:text-red-800 cursor-pointer"
+              onClick={() => signOut({ callbackUrl: "/login" })}
             >
-              <Link href="/api/auth/signout">
-                <LogOut /> Sign Out
-              </Link>
+              <LogOut /> Sign Out
             </Button>
           </div>
         </PopoverContent>
