@@ -1,11 +1,13 @@
 "use client";
 
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { Bot, Copy, User, Check } from "lucide-react";
 import { LegalMarkdownRenderer } from "@/components/ui/legal-markdown-renderer";
 import { useState, useCallback, useMemo } from "react";
+import Logo from "../logo";
+import { useSession } from "next-auth/react";
 
 interface ChatMessageProps {
   message: {
@@ -21,19 +23,17 @@ export function ChatMessage({ message, isLoading }: ChatMessageProps) {
   const isUser = message.type === "user";
   const isAssistant = message.type === "ai";
   const [copied, setCopied] = useState(false);
+  const session = useSession();
 
-  const copyToClipboard = useCallback(
-    async (text: string) => {
-      try {
-        await navigator.clipboard.writeText(text);
-        setCopied(true);
-        setTimeout(() => setCopied(false), 2000);
-      } catch (err) {
-        console.error("Failed to copy text: ", err);
-      }
-    },
-    []
-  );
+  const copyToClipboard = useCallback(async (text: string) => {
+    try {
+      await navigator.clipboard.writeText(text);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    } catch (err) {
+      console.error("Failed to copy text: ", err);
+    }
+  }, []);
 
   // Memoize the formatted message to prevent infinite re-renders
   const formattedMessage = useMemo(() => {
@@ -43,7 +43,7 @@ export function ChatMessage({ message, isLoading }: ChatMessageProps) {
 
     // Use our professional legal markdown renderer for AI responses
     return (
-      <LegalMarkdownRenderer 
+      <LegalMarkdownRenderer
         content={message.message}
         variant="compact"
         className="text-gray-100 [&_h1]:text-gray-100 [&_h2]:text-gray-100 [&_h3]:text-gray-100 [&_h4]:text-gray-100 [&_h5]:text-gray-100 [&_h6]:text-gray-100 [&_p]:text-gray-100 [&_li]:text-gray-100 [&_td]:text-gray-100 [&_th]:text-gray-100"
@@ -61,8 +61,8 @@ export function ChatMessage({ message, isLoading }: ChatMessageProps) {
       {/* Avatar for assistant */}
       {!isUser && (
         <Avatar className="h-6 w-6 sm:h-8 sm:w-8 shrink-0 mt-1">
-          <AvatarFallback className="bg-blue-600 text-white">
-            <Bot className="h-3 w-3 sm:h-4 sm:w-4" />
+          <AvatarFallback className="bg-white">
+            <Logo className="h-3 w-3 sm:h-4 sm:w-4" />
           </AvatarFallback>
         </Avatar>
       )}
@@ -78,7 +78,7 @@ export function ChatMessage({ message, isLoading }: ChatMessageProps) {
       >
         {/* Role Label */}
         <div className="text-xs text-gray-400 font-medium px-1">
-          {isUser ? "You" : "AI Assistant"}
+          {isUser ? "You" : "NyayaMitra AI Assistant"}
         </div>
 
         {/* Message Bubble */}
@@ -149,6 +149,9 @@ export function ChatMessage({ message, isLoading }: ChatMessageProps) {
       {/* Avatar for user */}
       {isUser && (
         <Avatar className="h-6 w-6 sm:h-8 sm:w-8 shrink-0 mt-1">
+          {session?.data?.user?.image ? (
+            <AvatarImage src={session.data.user.image} />
+          ) : null}
           <AvatarFallback className="bg-blue-600 text-white">
             <User className="h-3 w-3 sm:h-4 sm:w-4" />
           </AvatarFallback>
