@@ -4,10 +4,7 @@ import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { Bot, Copy, User, Check } from "lucide-react";
-import ReactMarkdown from "react-markdown";
-import remarkGfm from "remark-gfm";
-import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
-import { oneDark } from "react-syntax-highlighter/dist/esm/styles/prism";
+import { LegalMarkdownRenderer } from "@/components/ui/legal-markdown-renderer";
 import { useState, useCallback, useMemo } from "react";
 
 interface ChatMessageProps {
@@ -24,25 +21,13 @@ export function ChatMessage({ message, isLoading }: ChatMessageProps) {
   const isUser = message.type === "user";
   const isAssistant = message.type === "ai";
   const [copied, setCopied] = useState(false);
-  const [codeCopied, setCodeCopied] = useState<{ [key: string]: boolean }>({});
 
   const copyToClipboard = useCallback(
-    async (
-      text: string,
-      type: "message" | "code" = "message",
-      codeId?: string
-    ) => {
+    async (text: string) => {
       try {
         await navigator.clipboard.writeText(text);
-        if (type === "message") {
-          setCopied(true);
-          setTimeout(() => setCopied(false), 2000);
-        } else if (type === "code" && codeId) {
-          setCodeCopied((prev) => ({ ...prev, [codeId]: true }));
-          setTimeout(() => {
-            setCodeCopied((prev) => ({ ...prev, [codeId]: false }));
-          }, 2000);
-        }
+        setCopied(true);
+        setTimeout(() => setCopied(false), 2000);
       } catch (err) {
         console.error("Failed to copy text: ", err);
       }
@@ -56,95 +41,15 @@ export function ChatMessage({ message, isLoading }: ChatMessageProps) {
       return message.message;
     }
 
+    // Use our professional legal markdown renderer for AI responses
     return (
-      <ReactMarkdown
-        remarkPlugins={[remarkGfm]}
-        components={{
-          code(props) {
-            const { className, children, ...rest } = props;
-            const match = /language-(\w+)/.exec(className || "");
-            const isInline = !match;
-            const codeId = `code-${Math.random().toString(36).substr(2, 9)}`;
-
-            return !isInline && match ? (
-              <div className="relative my-2 sm:my-4 w-full max-w-full overflow-hidden rounded-lg bg-gray-800 border border-gray-700">
-                <div className="absolute top-2 right-2 z-10 flex gap-1">
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() =>
-                      copyToClipboard(String(children), "code", codeId)
-                    }
-                    className="h-6 w-6 p-0 opacity-70 hover:opacity-100 cursor-pointer bg-gray-700/50 hover:bg-gray-600"
-                  >
-                    {codeCopied[codeId] ? (
-                      <Check className="h-3 w-3 text-green-400" />
-                    ) : (
-                      <Copy className="h-3 w-3 text-gray-300" />
-                    )}
-                  </Button>
-                </div>
-                <div className="overflow-x-auto max-w-full scrollbar-thin scrollbar-thumb-gray-600 scrollbar-track-gray-800">
-                  <SyntaxHighlighter
-                    // @ts-expect-error - oneDark style type compatibility
-                    style={oneDark}
-                    language={match[1]}
-                    PreTag="div"
-                    customStyle={{
-                      margin: 0,
-                      padding: "1rem",
-                      paddingTop: "2.5rem",
-                      borderRadius: "0",
-                      fontSize: "0.75rem",
-                      lineHeight: "1.4",
-                      background: "transparent",
-                      minWidth: "100%",
-                      width: "max-content",
-                      fontFamily:
-                        "ui-monospace, SFMono-Regular, 'SF Mono', Monaco, Consolas, 'Liberation Mono', 'Courier New', monospace",
-                    }}
-                    showLineNumbers={false}
-                    wrapLines={false}
-                    {...rest}
-                  >
-                    {String(children).replace(/\n$/, "")}
-                  </SyntaxHighlighter>
-                </div>
-              </div>
-            ) : (
-              <code
-                className={cn(
-                  "relative rounded-md bg-gray-700 px-1.5 py-0.5 font-mono text-xs sm:text-sm text-gray-200 break-words max-w-full inline-block",
-                  className
-                )}
-                {...rest}
-              >
-                {children}
-              </code>
-            );
-          },
-          pre({ children }) {
-            return (
-              <div className="relative my-2 sm:my-4 w-full max-w-full overflow-hidden rounded-lg bg-gray-800 border border-gray-700">
-                <div className="overflow-x-auto max-w-full scrollbar-thin scrollbar-thumb-gray-600 scrollbar-track-gray-800">
-                  <pre className="p-3 sm:p-4 text-xs sm:text-sm text-gray-200 font-mono whitespace-pre min-w-full w-max">
-                    {children}
-                  </pre>
-                </div>
-              </div>
-            );
-          },
-          p: ({ children }) => (
-            <p className="text-xs sm:text-sm leading-relaxed mb-1 sm:mb-2 last:mb-0 text-gray-200 break-words">
-              {children}
-            </p>
-          ),
-        }}
-      >
-        {message.message}
-      </ReactMarkdown>
+      <LegalMarkdownRenderer 
+        content={message.message}
+        variant="compact"
+        className="text-gray-100 [&_h1]:text-gray-100 [&_h2]:text-gray-100 [&_h3]:text-gray-100 [&_h4]:text-gray-100 [&_h5]:text-gray-100 [&_h6]:text-gray-100 [&_p]:text-gray-100 [&_li]:text-gray-100 [&_td]:text-gray-100 [&_th]:text-gray-100"
+      />
     );
-  }, [message.message, copyToClipboard, codeCopied, isUser]);
+  }, [message.message, isUser]);
 
   return (
     <div
@@ -222,7 +127,7 @@ export function ChatMessage({ message, isLoading }: ChatMessageProps) {
           <Button
             variant="ghost"
             size="sm"
-            onClick={() => copyToClipboard(message.message, "message")}
+            onClick={() => copyToClipboard(message.message)}
             className="h-6 w-6 p-0 text-gray-400 hover:text-gray-200 hover:bg-gray-800 cursor-pointer"
           >
             {copied ? (
