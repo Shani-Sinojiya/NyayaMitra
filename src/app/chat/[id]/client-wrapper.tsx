@@ -32,7 +32,7 @@ export default function ClientWrapper({
   apiEndpoint = "/api/chat",
   chatId,
 }: ClientWrapperProps) {
-  // Safely handle initialMessages on the client side
+  // Safely handle initialMessages on the client side using useState initializer
   const [messages, setMessages] = useState<
     Array<{
       id?: string;
@@ -42,7 +42,13 @@ export default function ClientWrapper({
       role?: string;
       timestamp?: Date | string;
     }>
-  >([]);
+  >(() => {
+    // Initialize with initialMessages if they exist and are valid
+    if (Array.isArray(initialMessages)) {
+      return initialMessages;
+    }
+    return [];
+  });
   const [mounted, setMounted] = useState(false);
 
   // Set up the correct endpoint based on whether we have a chatId
@@ -51,14 +57,7 @@ export default function ClientWrapper({
   useEffect(() => {
     // Mark as mounted
     setMounted(true);
-
-    // Only set messages after component is mounted
-    if (Array.isArray(initialMessages)) {
-      setMessages(initialMessages);
-    } else {
-      setMessages([]);
-    }
-  }, [initialMessages, chatId, finalApiEndpoint]);
+  }, []);
 
   // Show a loading state until the component is mounted
   if (!mounted) {

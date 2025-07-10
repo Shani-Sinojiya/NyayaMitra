@@ -32,12 +32,12 @@ export function useChat(options: UseChatOptions = {}): UseChatReturn {
     maxRetries = 3,
   } = options;
 
-  // Initialize messages with validated initialMessages
-  useEffect(() => {
+  // Initialize messages with validated initialMessages using useState initializer
+  const [messages, setMessages] = useState<Message[]>(() => {
     // Ensure initialMessages are valid before setting state
     if (Array.isArray(initialMessages) && initialMessages.length > 0) {
       // Make sure each message has the required properties
-      const validatedMessages = initialMessages.map((msg) => ({
+      return initialMessages.map((msg) => ({
         id:
           msg.id ||
           `msg-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`,
@@ -45,12 +45,9 @@ export function useChat(options: UseChatOptions = {}): UseChatReturn {
         type: msg.type || "system",
         timestamp: msg.timestamp instanceof Date ? msg.timestamp : new Date(),
       }));
-
-      setMessages(validatedMessages);
     }
-  }, [initialMessages]);
-
-  const [messages, setMessages] = useState<Message[]>([]);
+    return [];
+  });
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<Error | null>(null);
   const [retryCount, setRetryCount] = useState(0);

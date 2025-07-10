@@ -206,7 +206,7 @@ export function UnifiedChat({
         advancedChat.sendMessage(pendingMessage);
       }
     }
-  }, [useAdvancedFeatures, advancedChat, navigation]);
+  }, [useAdvancedFeatures, navigation?.isNewChat]); // Remove advancedChat from dependencies to avoid infinite loops
 
   // Handle send message
   const handleSendMessage = (content: string) => {

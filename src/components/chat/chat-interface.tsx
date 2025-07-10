@@ -44,25 +44,29 @@ export function ChatInterface({
   const [showScrollButton, setShowScrollButton] = useState(false);
 
   const scrollToBottom = useCallback(() => {
-    if (scrollAreaRef.current) {
-      const viewport = scrollAreaRef.current.querySelector(
-        "[data-radix-scroll-area-viewport]"
-      );
-      if (viewport) {
-        viewport.scrollTo({
-          top: viewport.scrollHeight,
-          behavior: shouldAutoScroll ? "auto" : "smooth",
-        });
-        setShouldAutoScroll(true);
-        setShowScrollButton(false);
-      }
+    if (!scrollAreaRef.current) return;
+
+    const viewport = scrollAreaRef.current.querySelector(
+      "[data-radix-scroll-area-viewport]"
+    );
+    if (viewport) {
+      viewport.scrollTo({
+        top: viewport.scrollHeight,
+        behavior: shouldAutoScroll ? "auto" : "smooth",
+      });
+      setShouldAutoScroll(true);
+      setShowScrollButton(false);
     }
   }, [shouldAutoScroll]);
 
   // Auto-scroll to bottom when new messages arrive
   useEffect(() => {
-    if (shouldAutoScroll) {
-      scrollToBottom();
+    if (shouldAutoScroll && messages.length > 0) {
+      const timeoutId = setTimeout(() => {
+        scrollToBottom();
+      }, 100); // Small delay to ensure DOM is updated
+
+      return () => clearTimeout(timeoutId);
     }
   }, [messages, shouldAutoScroll, scrollToBottom]);
 
