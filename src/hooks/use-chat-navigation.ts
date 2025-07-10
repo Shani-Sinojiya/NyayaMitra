@@ -6,7 +6,7 @@ import { useCallback } from "react";
 
 // This is a simple way to pass the initial message when navigating
 // In a production app, you might use a more robust state management solution
-let pendingMessages: Record<string, string> = {};
+const pendingMessages: Record<string, string> = {};
 
 export function useChatNavigation() {
   const router = useRouter();
@@ -17,6 +17,7 @@ export function useChatNavigation() {
     (content: string) => {
       // Only create a new chat ID if we're on the /chat/new route
       if (currentChatId === "new") {
+        // Generate a new UUID for the session
         const newChatId = uuidv7();
 
         // Store the message to be sent after navigation

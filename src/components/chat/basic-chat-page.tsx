@@ -2,7 +2,7 @@
 
 import { UnifiedChat } from "./unified-chat";
 
-interface ChatPageProps {
+interface BasicChatPageProps {
   initialMessages?: Array<{
     id?: string;
     message?: string;
@@ -16,6 +16,6 @@ interface ChatPageProps {
   welcomeMessage?: string;
 }
 
-export default function ChatPage(props: ChatPageProps) {
-  return <UnifiedChat {...props} useAdvancedFeatures={true} />;
+export default function BasicChatPage(props: BasicChatPageProps) {
+  return <UnifiedChat {...props} useAdvancedFeatures={false} />;
 }

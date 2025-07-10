@@ -14,11 +14,9 @@ export function VoiceInputButton({
   disabled = false,
   size = "md",
 }: VoiceInputButtonProps) {
-  const [mounted, setMounted] = useState(false);
-
   // Only run client-side code after hydration
   useEffect(() => {
-    setMounted(true);
+    // Component is mounted, can perform client-side operations
   }, []);
 
   const sizeClasses = {
@@ -65,7 +63,6 @@ export function VoiceVisualization({
   isListening,
   className,
   error,
-  interimTranscript,
 }: VoiceVisualizationProps & {
   error?: string | null;
 }) {

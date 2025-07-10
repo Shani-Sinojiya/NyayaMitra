@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useCallback, useRef } from "react";
+import { useState, useCallback, useRef, useEffect } from "react";
 import { Message } from "@/components/chat";
 
 export interface UseChatOptions {
@@ -9,9 +9,6 @@ export interface UseChatOptions {
   onError?: (error: Error) => void;
   api?: string;
   maxRetries?: number;
-  chatId?: string;
-  userId?: string;
-  sessionId?: string;
   saveChatHistory?: boolean;
 }
 
@@ -33,13 +30,27 @@ export function useChat(options: UseChatOptions = {}): UseChatReturn {
     onError,
     api = "/api/chat",
     maxRetries = 3,
-    chatId,
-    userId,
-    sessionId,
-    saveChatHistory = true,
   } = options;
 
-  const [messages, setMessages] = useState<Message[]>(initialMessages);
+  // Initialize messages with validated initialMessages
+  useEffect(() => {
+    // Ensure initialMessages are valid before setting state
+    if (Array.isArray(initialMessages) && initialMessages.length > 0) {
+      // Make sure each message has the required properties
+      const validatedMessages = initialMessages.map((msg) => ({
+        id:
+          msg.id ||
+          `msg-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`,
+        message: msg.message || "",
+        type: msg.type || "system",
+        timestamp: msg.timestamp instanceof Date ? msg.timestamp : new Date(),
+      }));
+
+      setMessages(validatedMessages);
+    }
+  }, [initialMessages]);
+
+  const [messages, setMessages] = useState<Message[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<Error | null>(null);
   const [retryCount, setRetryCount] = useState(0);
@@ -76,15 +87,13 @@ export function useChat(options: UseChatOptions = {}): UseChatReturn {
         // Create abort controller
         abortControllerRef.current = new AbortController();
 
-        // Use chatId in the API endpoint if provided
-        const apiEndpoint = chatId ? `${api}/${chatId}` : api;
+        // We don't need to modify the API endpoint here anymore - that should be handled
+        // by the ClientWrapper component that correctly formats the API endpoint
+        const apiEndpoint = api;
 
-        // Prepare request body with additional metadata
+        // Prepare request body based on whether it's a new chat or existing chat
         const requestBody = {
-          messages: [...messages, userMessage],
-          userId,
-          sessionId,
-          saveChatHistory,
+          message: content,
         };
 
         // Call API
@@ -117,38 +126,33 @@ export function useChat(options: UseChatOptions = {}): UseChatReturn {
         setMessages((prev) => [...prev, assistantMessage]);
 
         if (reader) {
-          while (true) {
-            const { done, value } = await reader.read();
-            if (done) break;
+          try {
+            while (true) {
+              const { done, value } = await reader.read();
+              if (done) break;
 
-            const chunk = decoder.decode(value, { stream: true });
-            const lines = chunk.split("\n");
+              // Decode the chunk
+              const chunk = decoder.decode(value, { stream: true });
 
-            for (const line of lines) {
-              if (line.startsWith("data: ")) {
-                const data = line.slice(6);
-                if (data === "[DONE]") continue;
+              // Append to our content
+              assistantContent += chunk;
 
-                try {
-                  const parsed = JSON.parse(data);
-                  if (parsed.content) {
-                    assistantContent += parsed.content;
-
-                    // Update assistant message
-                    setMessages((prev) => {
-                      const newMessages = [...prev];
-                      const lastMessage = newMessages[newMessages.length - 1];
-                      if (lastMessage.type === "ai") {
-                        lastMessage.message = assistantContent;
-                      }
-                      return newMessages;
-                    });
-                  }
-                } catch (e) {
-                  console.error("Error parsing streaming response:", e);
+              // Update the message immediately
+              setMessages((prev) => {
+                const newMessages = [...prev];
+                const lastIndex = newMessages.length - 1;
+                if (lastIndex >= 0 && newMessages[lastIndex].type === "ai") {
+                  newMessages[lastIndex] = {
+                    ...newMessages[lastIndex],
+                    message: assistantContent,
+                  };
                 }
-              }
+                return newMessages;
+              });
             }
+          } catch (streamError) {
+            // Silent error handling for stream reading
+            console.error("Stream reading error:", streamError);
           }
         }
 
@@ -187,7 +191,7 @@ export function useChat(options: UseChatOptions = {}): UseChatReturn {
         abortControllerRef.current = null;
       }
     },
-    [messages, isLoading, api, onResponse, onError]
+    [isLoading, api, onResponse, onError]
   );
 
   const clearMessages = useCallback(() => {

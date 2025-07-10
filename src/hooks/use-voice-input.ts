@@ -17,13 +17,13 @@ interface SpeechRecognition extends EventTarget {
   start(): void;
   stop(): void;
   abort(): void;
-  onstart: ((this: SpeechRecognition, ev: Event) => any) | null;
-  onend: ((this: SpeechRecognition, ev: Event) => any) | null;
+  onstart: ((this: SpeechRecognition, ev: Event) => void) | null;
+  onend: ((this: SpeechRecognition, ev: Event) => void) | null;
   onresult:
-    | ((this: SpeechRecognition, ev: SpeechRecognitionEvent) => any)
+    | ((this: SpeechRecognition, ev: SpeechRecognitionEvent) => void)
     | null;
   onerror:
-    | ((this: SpeechRecognition, ev: SpeechRecognitionErrorEvent) => any)
+    | ((this: SpeechRecognition, ev: SpeechRecognitionErrorEvent) => void)
     | null;
 }
 
@@ -63,68 +63,61 @@ export function useVoiceInput(): UseVoiceInputReturn {
   // Check for browser support on client-side only
   useEffect(() => {
     if (typeof window !== "undefined") {
-      // Check if the SpeechRecognition APIs are available
       const hasSpeechRecognition =
         "SpeechRecognition" in window || "webkitSpeechRecognition" in window;
 
-      console.log("Speech recognition supported:", hasSpeechRecognition);
-
       if (hasSpeechRecognition) {
-        // Test initialize a recognition instance to ensure it actually works
         try {
           const SpeechRecognition =
             window.SpeechRecognition || window.webkitSpeechRecognition;
           const testRecognition = new SpeechRecognition();
-
-          // Immediately abort to avoid any actual microphone access
           testRecognition.abort();
-
-          // If we get here, the API seems to be working
           setIsSupported(true);
-          console.log("Successfully tested speech recognition");
         } catch (err) {
-          console.error("Error testing speech recognition:", err);
+          console.error("Speech recognition test failed:", err);
           setIsSupported(false);
         }
       } else {
         setIsSupported(false);
       }
-    } else {
-      // We're on the server, so no support
-      setIsSupported(false);
     }
   }, []);
 
-  // Helper function to format transcript text
-  const formatTranscript = (text: string): string => {
-    if (!text) return "";
+  // Helper function to format transcript text - memoized to prevent infinite loops
+  const formatTranscript = useCallback(
+    (text: string, currentTranscript: string): string => {
+      if (!text) return "";
 
-    // Add space if needed for concatenation
-    const needsLeadingSpace =
-      text.charAt(0) !== " " &&
-      text.charAt(0) !== "." &&
-      text.charAt(0) !== "," &&
-      text.charAt(0) !== "?" &&
-      text.charAt(0) !== "!";
+      // Add space if needed for concatenation
+      const needsLeadingSpace =
+        text.charAt(0) !== " " &&
+        text.charAt(0) !== "." &&
+        text.charAt(0) !== "," &&
+        text.charAt(0) !== "?" &&
+        text.charAt(0) !== "!";
 
-    // Capitalize first letter if it starts a new sentence
-    // (after period, question mark, exclamation mark, or is the first transcript)
-    const shouldCapitalize =
-      !transcript ||
-      transcript.endsWith(".") ||
-      transcript.endsWith("?") ||
-      transcript.endsWith("!");
+      // Capitalize first letter if it starts a new sentence
+      // (after period, question mark, exclamation mark, or is the first transcript)
+      const shouldCapitalize =
+        !currentTranscript ||
+        currentTranscript.endsWith(".") ||
+        currentTranscript.endsWith("?") ||
+        currentTranscript.endsWith("!");
 
-    let formattedText = text;
+      let formattedText = text;
 
-    if (shouldCapitalize && formattedText.length > 0) {
-      formattedText =
-        formattedText.charAt(0).toUpperCase() + formattedText.slice(1);
-    }
+      if (shouldCapitalize && formattedText.length > 0) {
+        formattedText =
+          formattedText.charAt(0).toUpperCase() + formattedText.slice(1);
+      }
 
-    // Add leading space if needed and not at the start of a message
-    return (transcript && needsLeadingSpace ? " " : "") + formattedText;
-  };
+      // Add leading space if needed and not at the start of a message
+      return (
+        (currentTranscript && needsLeadingSpace ? " " : "") + formattedText
+      );
+    },
+    []
+  );
 
   const checkNetworkConnectivity = useCallback(() => {
     return typeof navigator !== "undefined" && navigator.onLine;
@@ -133,7 +126,6 @@ export function useVoiceInput(): UseVoiceInputReturn {
   // Process recognition results
   const processRecognitionResult = useCallback(
     (event: SpeechRecognitionEvent) => {
-      console.log("Processing recognition result...");
       let finalTranscript = "";
       let currentInterimTranscript = "";
 
@@ -142,45 +134,27 @@ export function useVoiceInput(): UseVoiceInputReturn {
         const result = event.results[i];
         const transcript = result[0].transcript;
 
-        console.log(
-          `Result ${i}: isFinal=${result.isFinal}, text="${transcript}"`
-        );
-
         if (result.isFinal) {
-          // Process final transcripts
           finalTranscript += transcript;
         } else {
-          // Collect interim transcripts
           currentInterimTranscript += transcript;
         }
       }
 
       // Apply formatting and update state
       if (finalTranscript) {
-        console.log("Setting final transcript:", finalTranscript);
-
-        // Clear interim when final is available to avoid duplication
         setInterimTranscript("");
-
-        // Update transcript with formatted text
         setTranscript((prevTranscript) => {
-          const formattedText = formatTranscript(finalTranscript);
-          console.log("Formatted final transcript:", formattedText);
-
-          // Ensure we don't duplicate text that might already be there
+          const formattedText = formatTranscript(
+            finalTranscript,
+            prevTranscript
+          );
           if (prevTranscript.endsWith(formattedText)) {
-            console.log("Text already in transcript, not adding again");
             return prevTranscript;
           }
-
           return prevTranscript + formattedText;
         });
       } else if (currentInterimTranscript) {
-        // Only update interim if we don't have a final transcript in this batch
-        console.log("Setting interim transcript:", currentInterimTranscript);
-
-        // For interim updates, simply replace the current interim
-        // This avoids duplication in the UI where interim text is displayed
         setInterimTranscript(currentInterimTranscript);
       }
     },
@@ -206,14 +180,11 @@ export function useVoiceInput(): UseVoiceInputReturn {
     setError(null);
 
     try {
-      console.log("Initializing speech recognition...");
-
       // Force cleanup of any existing recognition instance
       if (recognitionRef.current) {
         try {
           recognitionRef.current.abort();
           recognitionRef.current = null;
-          console.log("Cleaned up previous recognition instance");
         } catch (e) {
           console.error("Error cleaning up previous recognition:", e);
         }
@@ -228,7 +199,6 @@ export function useVoiceInput(): UseVoiceInputReturn {
       }
 
       const recognition = new SpeechRecognition();
-      console.log("Created new recognition instance");
 
       // Configure recognition instance
       recognition.continuous = true;
@@ -244,17 +214,14 @@ export function useVoiceInput(): UseVoiceInputReturn {
       }, 3000);
 
       recognition.onstart = () => {
-        console.log("Recognition started successfully");
         clearTimeout(startTimeout);
         setIsListening(true);
         setError(null);
         setInterimTranscript("");
-        reconnectAttemptsRef.current = 0; // Reset reconnect attempts on successful start
+        reconnectAttemptsRef.current = 0;
       };
 
       recognition.onresult = (event: SpeechRecognitionEvent) => {
-        console.log("Speech recognition onresult event triggered");
-        // Use the extracted function to handle results
         processRecognitionResult(event);
       };
 
@@ -264,11 +231,9 @@ export function useVoiceInput(): UseVoiceInputReturn {
 
         // Before handling error, save any current interim transcript
         if (interimTranscript && interimTranscript.trim()) {
-          console.log(
-            "Saving interim transcript before error handling:",
-            interimTranscript
+          setTranscript(
+            (prev) => prev + formatTranscript(interimTranscript, prev)
           );
-          setTranscript((prev) => prev + formatTranscript(interimTranscript));
           setInterimTranscript("");
         }
 
@@ -422,68 +387,61 @@ export function useVoiceInput(): UseVoiceInputReturn {
         }
       };
     } catch (err) {
+      console.error("Failed to start speech recognition:", err);
       setError("Failed to start speech recognition");
       setIsListening(false);
     }
-  }, [isSupported, isListening]);
+  }, [
+    isSupported,
+    isListening,
+    checkNetworkConnectivity,
+    processRecognitionResult,
+    formatTranscript,
+    interimTranscript,
+    error,
+  ]);
 
   const stopListening = useCallback(() => {
-    console.log("Stopping voice recognition...");
-
     // Clear any pending network check intervals
     if (typeof window !== "undefined") {
-      const win = window as any;
+      const win = window as Window & {
+        _voiceNetworkCheckInterval?: NodeJS.Timeout;
+      };
       if (win._voiceNetworkCheckInterval) {
         clearInterval(win._voiceNetworkCheckInterval);
-        win._voiceNetworkCheckInterval = null;
+        win._voiceNetworkCheckInterval = undefined;
       }
     }
 
     // Reset reconnect attempts on manual stop
     reconnectAttemptsRef.current = 0;
 
-    // CRITICAL: Store the current interim transcript value BEFORE any state changes
+    // Store the current interim transcript value BEFORE any state changes
     const currentInterimText = interimTranscript;
-    console.log("Current interim transcript on stop:", currentInterimText);
-
-    // IMPORTANT: Set a flag to indicate this is a manual stop operation
-    const isManualStop = true;
 
     // Process the interim transcript BEFORE stopping the recognition
-    // This ensures we don't lose any speech that was captured but not yet finalized
     if (currentInterimText && currentInterimText.trim()) {
-      console.log(
-        "Setting final transcript from interim on stop:",
-        currentInterimText
-      );
-
       try {
-        // Force a synchronous update of the transcript state
         setTranscript((prevTranscript) => {
-          console.log("Previous transcript:", prevTranscript);
-          const formattedText = formatTranscript(currentInterimText);
-          console.log("Formatted interim text being added:", formattedText);
+          const formattedText = formatTranscript(
+            currentInterimText,
+            prevTranscript
+          );
           return prevTranscript + formattedText;
         });
-
-        // Clear interim after saving it as final to prevent duplication
         setInterimTranscript("");
       } catch (err) {
         console.error("Error updating transcript:", err);
       }
     }
 
-    // CRITICAL: Immediately set listening state to false for UI responsiveness
-    // This must happen AFTER we've processed the interim transcript but BEFORE stopping recognition
+    // Set listening state to false for UI responsiveness
     setIsListening(false);
 
     // Then try to gracefully stop the recognition
     if (recognitionRef.current) {
       try {
-        console.log("Stopping recognition instance...");
-
-        // First, detach all event handlers to prevent any callbacks during shutdown
-        // This is critical to prevent race conditions
+        // Detach all event handlers to prevent callbacks during shutdown
         recognitionRef.current.onend = null;
         recognitionRef.current.onerror = null;
         recognitionRef.current.onresult = null;
@@ -496,17 +454,12 @@ export function useVoiceInput(): UseVoiceInputReturn {
         try {
           recognitionRef.current.stop();
         } catch (innerErr) {
-          console.log(
-            "Could not call stop() after abort(), but this is expected"
-          );
+          console.error("Error during stop fallback:", innerErr);
         }
 
         // Clear the recognition reference
         recognitionRef.current = null;
-
-        console.log("Recognition successfully stopped");
       } catch (err) {
-        // Log error but we've already cleaned up state
         console.error("Error stopping recognition:", err);
         recognitionRef.current = null;
       }
@@ -567,7 +520,7 @@ export function useVoiceInput(): UseVoiceInputReturn {
       try {
         recognitionRef.current.abort();
       } catch (err) {
-        // Ignore errors here
+        console.error("Error during cleanup:", err);
       }
       recognitionRef.current = null;
     }

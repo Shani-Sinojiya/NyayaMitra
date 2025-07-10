@@ -1,30 +1,35 @@
-import React, { Fragment } from "react";
+import React, { Fragment, Suspense } from "react";
 import Header from "../../header";
-import ChatLoader from "./chat-loader";
-import { ChatPage, Message } from "@/components/chat";
 import { notFound } from "next/navigation";
+import ClientWrapper from "./client-wrapper";
 
-export const dynamic = "force-dynamic"; // This page should always be dynamic
-export const revalidate = 0; // Disable static generation for this page
-export const fetchCache = "force-no-store"; // Disable caching for this page
+// These Next.js config options ensure the page is always fetched fresh
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
+export const fetchCache = "force-no-store";
+
+// Define the Message type
+type Message = {
+  id: string;
+  message: string;
+  type: "user" | "ai" | "system";
+  timestamp: Date;
+};
 
 type ChatData = {
   id: string;
   title: string;
   messages: Array<{
-    id: string;
-    content: string;
-    role: "user" | "assistant" | "system";
-    timestamp: string; // ISO date string from API
+    message: string;
+    type: "human" | "ai" | "system";
   }>;
-  createdAt: string;
-  updatedAt: string;
 };
 
 async function getChatById(id: string): Promise<ChatData | null> {
   try {
     // In a production environment, you would use your API base URL
     const baseUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3000";
+
     const response = await fetch(`${baseUrl}/api/chat/${id}`, {
       method: "GET",
       headers: { "Content-Type": "application/json" },
@@ -38,10 +43,50 @@ async function getChatById(id: string): Promise<ChatData | null> {
       throw new Error(`Failed to fetch chat: ${response.statusText}`);
     }
 
-    return await response.json();
-  } catch (error) {
-    console.error("Error fetching chat:", error);
-    throw error;
+    let data;
+    try {
+      data = await response.json();
+    } catch {
+      return {
+        id,
+        title: "Legal AI Assistant",
+        messages: [],
+      };
+    } // Validate the structure of the returned data
+    if (!data || typeof data !== "object") {
+      return {
+        id,
+        title: "Legal AI Assistant",
+        messages: [],
+      };
+    }
+
+    // Handle case where API returns chat array instead of messages array
+    if (
+      data.chat &&
+      Array.isArray(data.chat) &&
+      (!data.messages || !Array.isArray(data.messages))
+    ) {
+      data.messages = data.chat;
+    }
+
+    // Ensure messages is an array
+    if (!data.messages || !Array.isArray(data.messages)) {
+      data.messages = [];
+    }
+
+    // Make sure id and title exist
+    if (!data.id) data.id = id;
+    if (!data.title) data.title = "Legal AI Assistant";
+
+    return data;
+  } catch {
+    // Return a default structured object instead of throwing
+    return {
+      id,
+      title: "Legal AI Assistant",
+      messages: [],
+    };
   }
 }
 
@@ -54,38 +99,87 @@ const Page = async ({ params }: { params: Promise<{ id: string }> }) => {
       <Fragment>
         <Header title="New Chat" />
         <div className="h-[calc(100vh-48px)] sm:h-[calc(100vh-56px)] w-full overflow-hidden">
-          <ChatPage
-            title="Legal AI Assistant"
-            welcomeMessage="I can help with legal questions, draft documents, explain legal concepts, and more. Try one of the suggestions below or ask your own question."
-          />
+          <Suspense
+            fallback={<div className="p-4">Loading chat interface...</div>}
+          >
+            <ClientWrapper
+              title="Legal AI Assistant"
+              welcomeMessage="I can help with legal questions, draft documents, explain legal concepts, and more. Try one of the suggestions below or ask your own question."
+              apiEndpoint={`/api/chat`}
+            />
+          </Suspense>
         </div>
       </Fragment>
     );
   }
 
   // Fetch chat data
-  const chatData = await getChatById(chatId);
+  let chatData: ChatData = {
+    id: chatId,
+    title: "Legal AI Assistant",
+    messages: [],
+  };
 
-  // If chat not found, return 404
-  if (!chatData) {
-    notFound();
+  try {
+    const fetchedData = await getChatById(chatId);
+
+    if (!fetchedData) {
+      return notFound();
+    }
+
+    chatData = fetchedData;
+
+    // Double-check if messages array exists and is valid
+    if (!chatData.messages || !Array.isArray(chatData.messages)) {
+      // Provide empty messages array as fallback
+      chatData.messages = [];
+    }
+  } catch {
+    // Already initialized with defaults above
   }
 
-  // Convert ISO date strings to Date objects for proper timestamp handling
-  const formattedMessages: Message[] = chatData.messages.map((msg) => ({
-    ...msg,
-    timestamp: new Date(msg.timestamp),
-  }));
+  // Ensure messages is an array
+  const messagesArray = Array.isArray(chatData.messages)
+    ? chatData.messages
+    : [];
+
+  // Convert messages to the format expected by ChatPage
+  const formattedMessages: Message[] = messagesArray.map((msg: unknown) => {
+    const messageObj = msg as Record<string, unknown>;
+    return {
+      id:
+        (messageObj?.id as string) ||
+        `msg-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`,
+      message:
+        (messageObj?.message as string) ||
+        (messageObj?.content as string) ||
+        "",
+      type: ((messageObj?.type as string) === "human" ||
+      (messageObj?.role as string) === "user"
+        ? "user"
+        : (messageObj?.type as string) === "ai" ||
+          (messageObj?.role as string) === "assistant"
+        ? "ai"
+        : "system") as "user" | "ai" | "system",
+      timestamp: messageObj?.timestamp
+        ? new Date(messageObj.timestamp as string)
+        : new Date(),
+    };
+  });
 
   return (
     <Fragment>
       <Header title={chatData.title || "Legal AI Assistant"} />
       <div className="h-[calc(100vh-48px)] sm:h-[calc(100vh-56px)] w-full overflow-hidden">
-        <ChatPage
-          initialMessages={formattedMessages}
-          title={chatData.title}
-          welcomeMessage="How can I help with your legal questions today?"
-        />
+        <Suspense fallback={<div className="p-4">Loading chat...</div>}>
+          <ClientWrapper
+            initialMessages={formattedMessages}
+            title={chatData.title || "Legal AI Assistant"}
+            welcomeMessage="How can I help with your legal questions today?"
+            apiEndpoint="/api/chat"
+            chatId={chatId}
+          />
+        </Suspense>
       </div>
     </Fragment>
   );

@@ -30,11 +30,9 @@ import { useEffect, useState } from "react";
 import { Button } from "./ui/button";
 
 type ChatSummary = {
-  id: string;
+  _id: string;
   title: string;
-  lastMessage: string;
-  createdAt: Date;
-  updatedAt: Date;
+  chatid: string;
 };
 
 export function NavChatList() {
@@ -89,9 +87,9 @@ export function NavChatList() {
           <div className="px-3 py-2 text-sm text-gray-500">No chats found</div>
         ) : (
           chats.map((chat) => (
-            <SidebarMenuItem key={chat.id}>
+            <SidebarMenuItem key={chat._id}>
               <SidebarMenuButton asChild>
-                <Link href={`/chat/${chat.id}`}>
+                <Link href={`/chat/${chat.chatid}`}>
                   <span className="truncate">{chat.title}</span>
                 </Link>
               </SidebarMenuButton>

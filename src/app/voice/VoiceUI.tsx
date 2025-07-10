@@ -1,6 +1,6 @@
 "use client";
 
-import { Mic, X } from "lucide-react";
+import { Mic, PhoneCall, PhoneOff, X } from "lucide-react";
 import { motion } from "framer-motion";
 import { useEffect, useState, useCallback } from "react";
 import { useRouter } from "next/navigation";
@@ -24,8 +24,7 @@ const VoiceUI = () => {
     return signedUrl;
   };
 
-  const conversation = useConversation({
-  });
+  const conversation = useConversation({});
 
   const startConversation = useCallback(async () => {
     try {
@@ -100,27 +99,51 @@ const VoiceUI = () => {
 
       {/* Controls */}
       <div className="absolute bottom-6 flex items-center gap-6">
-        <Button
-          className="rounded-full size-14 cursor-pointer"
-          variant={"secondary"}
-          onClick={() => {
-            if (conversation.status === "connected") {
-              stopConversation();
-            } else {
-              startConversation();
-            }
-          }}
-        >
-          <Mic className="!w-6 !h-6" />
-        </Button>
+        {conversation.status === "connected" ? (
+          <Button
+            variant={"secondary"}
+            className="rounded-full size-14 cursor-pointer"
+            onClick={() => {
+              if (conversation.status === "connected") {
+                stopConversation();
+              } else {
+                startConversation();
+              }
+            }}
+          >
+            <Mic className="!w-6 !h-6" />
+          </Button>
+        ) : null}
 
-        <Button
-          variant={"destructive"}
-          className="rounded-full size-14 cursor-pointer"
-          onClick={() => router.push("/")}
-        >
-          <X className="!w-6 !h-6" />
-        </Button>
+        {conversation.status === "connecting" ? (
+          <Button
+            variant={"secondary"}
+            className="rounded-full size-14 cursor-pointer"
+            onClick={stopConversation}
+          >
+            <PhoneOff className="!w-6 !h-6" />
+          </Button>
+        ) : null}
+
+        {conversation.status === "disconnected" ? (
+          <Button
+            variant={"secondary"}
+            className="rounded-full size-14 cursor-pointer bg-green-600 hover:bg-green-700 text-gray-100"
+            onClick={startConversation}
+          >
+            <PhoneCall className="!w-6 !h-6" />
+          </Button>
+        ) : null}
+
+        {conversation.status === "connected" ? (
+          <Button
+            variant={"destructive"}
+            className="rounded-full size-14 cursor-pointer"
+            onClick={() => router.push("/")}
+          >
+            <X className="!w-6 !h-6" />
+          </Button>
+        ) : null}
       </div>
     </div>
   );

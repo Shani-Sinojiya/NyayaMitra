@@ -17,9 +17,31 @@ export async function GET(
 
     const chat = await res.json();
 
+    // Make sure the response always has a messages array
+    if (!chat || typeof chat !== "object") {
+      return NextResponse.json({
+        id,
+        title: "Legal AI Assistant",
+        messages: [],
+      });
+    }
+
+    // Handle the case where the API returns chat array instead of messages array
+    if (
+      chat.chat &&
+      Array.isArray(chat.chat) &&
+      (!chat.messages || !Array.isArray(chat.messages))
+    ) {
+      chat.messages = chat.chat;
+    }
+
+    // Ensure messages is an array
+    if (!chat.messages || !Array.isArray(chat.messages)) {
+      chat.messages = [];
+    }
+
     return NextResponse.json(chat);
-  } catch (error) {
-    console.error("Error fetching chat:", error);
+  } catch {
     return NextResponse.json(
       { error: "Internal server error" },
       { status: 500 }
@@ -52,11 +74,25 @@ export async function POST(
       }),
     });
 
-    const chatSummary = await res.json();
+    const { output } = await res.json();
 
-    return NextResponse.json(chatSummary.output);
-  } catch (error) {
-    console.error("Error creating chat:", error);
+    const encoder = new TextEncoder();
+    const stream = new ReadableStream({
+      async start(controller) {
+        // Send the entire string at once for better reliability
+        controller.enqueue(encoder.encode(output));
+        controller.close();
+      },
+    });
+
+    return new NextResponse(stream, {
+      headers: {
+        "Content-Type": "text/event-stream",
+        "Cache-Control": "no-cache",
+        Connection: "keep-alive",
+      },
+    });
+  } catch {
     return NextResponse.json(
       { error: "Internal server error" },
       { status: 500 }

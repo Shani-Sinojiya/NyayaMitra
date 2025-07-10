@@ -22,18 +22,13 @@ export function ChatInput({
   onStopGeneration,
   disabled = false,
   placeholder = "Type your message...",
-  chatId,
   autoFocus = false,
 }: ChatInputProps) {
   const [message, setMessage] = useState("");
-  const [clientReady, setClientReady] = useState(false);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
-  // Mark when client-side code is ready
+  // Auto-focus the textarea when the component mounts
   useEffect(() => {
-    setClientReady(true);
-
-    // Auto-focus the textarea when the component mounts
     if (autoFocus && textareaRef.current) {
       textareaRef.current.focus();
     }

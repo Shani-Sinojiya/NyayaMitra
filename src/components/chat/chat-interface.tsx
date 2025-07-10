@@ -7,7 +7,7 @@ import { ChatInput } from "./chat-input";
 import { ChatSuggestions } from "./chat-suggestions";
 import { cn } from "@/lib/utils";
 import { MessageCircle } from "lucide-react";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, useCallback } from "react";
 import "./mobile-optimizations.css";
 import { Message } from "./index";
 
@@ -29,7 +29,6 @@ interface ChatInterfaceProps {
 export function ChatInterface({
   messages,
   onSendMessage,
-  onClearChat,
   isLoading = false,
   onStopGeneration,
   className,
@@ -44,12 +43,28 @@ export function ChatInterface({
   const [shouldAutoScroll, setShouldAutoScroll] = useState(true);
   const [showScrollButton, setShowScrollButton] = useState(false);
 
+  const scrollToBottom = useCallback(() => {
+    if (scrollAreaRef.current) {
+      const viewport = scrollAreaRef.current.querySelector(
+        "[data-radix-scroll-area-viewport]"
+      );
+      if (viewport) {
+        viewport.scrollTo({
+          top: viewport.scrollHeight,
+          behavior: shouldAutoScroll ? "auto" : "smooth",
+        });
+        setShouldAutoScroll(true);
+        setShowScrollButton(false);
+      }
+    }
+  }, [shouldAutoScroll]);
+
   // Auto-scroll to bottom when new messages arrive
   useEffect(() => {
     if (shouldAutoScroll) {
       scrollToBottom();
     }
-  }, [messages, shouldAutoScroll]);
+  }, [messages, shouldAutoScroll, scrollToBottom]);
 
   // Monitor scroll position
   useEffect(() => {
@@ -71,22 +86,6 @@ export function ChatInterface({
     viewport.addEventListener("scroll", handleScroll);
     return () => viewport.removeEventListener("scroll", handleScroll);
   }, [messages.length]);
-
-  const scrollToBottom = () => {
-    if (scrollAreaRef.current) {
-      const viewport = scrollAreaRef.current.querySelector(
-        "[data-radix-scroll-area-viewport]"
-      );
-      if (viewport) {
-        viewport.scrollTo({
-          top: viewport.scrollHeight,
-          behavior: shouldAutoScroll ? "auto" : "smooth",
-        });
-        setShouldAutoScroll(true);
-        setShowScrollButton(false);
-      }
-    }
-  };
 
   return (
     <div
@@ -122,9 +121,15 @@ export function ChatInterface({
             ) : (
               <div className="space-y-3 sm:space-y-4 w-full">
                 {messages.map((message, index) => (
-                  <div key={message.id} className="group relative w-full">
+                  <div
+                    key={message.id || `message-${index}`}
+                    className="group relative w-full"
+                  >
                     <ChatMessage
-                      message={message}
+                      message={{
+                        ...message,
+                        id: message.id || `message-${index}`,
+                      }}
                       isLoading={
                         isLoading &&
                         index === messages.length - 1 &&

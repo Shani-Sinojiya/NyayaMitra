@@ -15,7 +15,8 @@ export default function NotFound() {
             Chat Not Found
           </h2>
           <p className="text-gray-400 mb-6">
-            The chat you're looking for doesn't exist or has been deleted.
+            The chat you&apos;re looking for doesn&apos;t exist or has been
+            deleted.
           </p>
           <Button asChild>
             <Link href="/chat/new">Start a New Chat</Link>

@@ -1,6 +1,10 @@
 import { auth } from "@/auth";
 import { NextResponse } from "next/server";
 
+export const dynamic = "force-dynamic"; // Ensure this route is always dynamic
+export const revalidate = 0; // Disable static generation for this route
+export const fetchCache = "force-no-store"; // Disable caching for this route
+
 export async function GET() {
   try {
     const session = await auth();

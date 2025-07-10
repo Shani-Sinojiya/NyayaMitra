@@ -60,39 +60,114 @@ export function ChatSuggestions({ onSelectSuggestion }: ChatSuggestionProps) {
   // Icons for suggestions to make them visually distinct
   const suggestionIcons = {
     popular: [
-      <Shield className="h-5 w-5 mr-2 sm:mr-3 text-blue-500 shrink-0 mt-0.5 sm:mt-0" />,
-      <Award className="h-5 w-5 mr-2 sm:mr-3 text-blue-500 shrink-0 mt-0.5 sm:mt-0" />,
-      <Building className="h-5 w-5 mr-2 sm:mr-3 text-blue-500 shrink-0 mt-0.5 sm:mt-0" />,
-      <FileSignature className="h-5 w-5 mr-2 sm:mr-3 text-blue-500 shrink-0 mt-0.5 sm:mt-0" />,
-      <Home className="h-5 w-5 mr-2 sm:mr-3 text-blue-500 shrink-0 mt-0.5 sm:mt-0" />,
+      <Shield
+        key="shield-1"
+        className="h-5 w-5 mr-2 sm:mr-3 text-blue-500 shrink-0 mt-0.5 sm:mt-0"
+      />,
+      <Award
+        key="award-1"
+        className="h-5 w-5 mr-2 sm:mr-3 text-blue-500 shrink-0 mt-0.5 sm:mt-0"
+      />,
+      <Building
+        key="building-1"
+        className="h-5 w-5 mr-2 sm:mr-3 text-blue-500 shrink-0 mt-0.5 sm:mt-0"
+      />,
+      <FileSignature
+        key="file-signature-1"
+        className="h-5 w-5 mr-2 sm:mr-3 text-blue-500 shrink-0 mt-0.5 sm:mt-0"
+      />,
+      <Home
+        key="home-1"
+        className="h-5 w-5 mr-2 sm:mr-3 text-blue-500 shrink-0 mt-0.5 sm:mt-0"
+      />,
     ],
     contracts: [
-      <FileSignature className="h-5 w-5 mr-2 sm:mr-3 text-blue-500 shrink-0 mt-0.5 sm:mt-0" />,
-      <Users className="h-5 w-5 mr-2 sm:mr-3 text-blue-500 shrink-0 mt-0.5 sm:mt-0" />,
-      <AlertTriangle className="h-5 w-5 mr-2 sm:mr-3 text-blue-500 shrink-0 mt-0.5 sm:mt-0" />,
-      <Shield className="h-5 w-5 mr-2 sm:mr-3 text-blue-500 shrink-0 mt-0.5 sm:mt-0" />,
-      <ScrollText className="h-5 w-5 mr-2 sm:mr-3 text-blue-500 shrink-0 mt-0.5 sm:mt-0" />,
+      <FileSignature
+        key="file-signature-2"
+        className="h-5 w-5 mr-2 sm:mr-3 text-blue-500 shrink-0 mt-0.5 sm:mt-0"
+      />,
+      <Users
+        key="users-1"
+        className="h-5 w-5 mr-2 sm:mr-3 text-blue-500 shrink-0 mt-0.5 sm:mt-0"
+      />,
+      <AlertTriangle
+        key="alert-triangle-1"
+        className="h-5 w-5 mr-2 sm:mr-3 text-blue-500 shrink-0 mt-0.5 sm:mt-0"
+      />,
+      <Shield
+        key="shield-2"
+        className="h-5 w-5 mr-2 sm:mr-3 text-blue-500 shrink-0 mt-0.5 sm:mt-0"
+      />,
+      <ScrollText
+        key="scroll-text-1"
+        className="h-5 w-5 mr-2 sm:mr-3 text-blue-500 shrink-0 mt-0.5 sm:mt-0"
+      />,
     ],
     ip: [
-      <Award className="h-5 w-5 mr-2 sm:mr-3 text-blue-500 shrink-0 mt-0.5 sm:mt-0" />,
-      <Globe className="h-5 w-5 mr-2 sm:mr-3 text-blue-500 shrink-0 mt-0.5 sm:mt-0" />,
-      <Lightbulb className="h-5 w-5 mr-2 sm:mr-3 text-blue-500 shrink-0 mt-0.5 sm:mt-0" />,
-      <FileText className="h-5 w-5 mr-2 sm:mr-3 text-blue-500 shrink-0 mt-0.5 sm:mt-0" />,
-      <Shield className="h-5 w-5 mr-2 sm:mr-3 text-blue-500 shrink-0 mt-0.5 sm:mt-0" />,
+      <Award
+        key="award-2"
+        className="h-5 w-5 mr-2 sm:mr-3 text-blue-500 shrink-0 mt-0.5 sm:mt-0"
+      />,
+      <Globe
+        key="globe-1"
+        className="h-5 w-5 mr-2 sm:mr-3 text-blue-500 shrink-0 mt-0.5 sm:mt-0"
+      />,
+      <Lightbulb
+        key="lightbulb-1"
+        className="h-5 w-5 mr-2 sm:mr-3 text-blue-500 shrink-0 mt-0.5 sm:mt-0"
+      />,
+      <FileText
+        key="file-text-1"
+        className="h-5 w-5 mr-2 sm:mr-3 text-blue-500 shrink-0 mt-0.5 sm:mt-0"
+      />,
+      <Shield
+        key="shield-3"
+        className="h-5 w-5 mr-2 sm:mr-3 text-blue-500 shrink-0 mt-0.5 sm:mt-0"
+      />,
     ],
     business: [
-      <Building className="h-5 w-5 mr-2 sm:mr-3 text-blue-500 shrink-0 mt-0.5 sm:mt-0" />,
-      <Users className="h-5 w-5 mr-2 sm:mr-3 text-blue-500 shrink-0 mt-0.5 sm:mt-0" />,
-      <Globe className="h-5 w-5 mr-2 sm:mr-3 text-blue-500 shrink-0 mt-0.5 sm:mt-0" />,
-      <AlertTriangle className="h-5 w-5 mr-2 sm:mr-3 text-blue-500 shrink-0 mt-0.5 sm:mt-0" />,
-      <FileText className="h-5 w-5 mr-2 sm:mr-3 text-blue-500 shrink-0 mt-0.5 sm:mt-0" />,
+      <Building
+        key="building-2"
+        className="h-5 w-5 mr-2 sm:mr-3 text-blue-500 shrink-0 mt-0.5 sm:mt-0"
+      />,
+      <Users
+        key="users-2"
+        className="h-5 w-5 mr-2 sm:mr-3 text-blue-500 shrink-0 mt-0.5 sm:mt-0"
+      />,
+      <Globe
+        key="globe-2"
+        className="h-5 w-5 mr-2 sm:mr-3 text-blue-500 shrink-0 mt-0.5 sm:mt-0"
+      />,
+      <AlertTriangle
+        key="alert-triangle-2"
+        className="h-5 w-5 mr-2 sm:mr-3 text-blue-500 shrink-0 mt-0.5 sm:mt-0"
+      />,
+      <FileText
+        key="file-text-2"
+        className="h-5 w-5 mr-2 sm:mr-3 text-blue-500 shrink-0 mt-0.5 sm:mt-0"
+      />,
     ],
     litigation: [
-      <Gavel className="h-5 w-5 mr-2 sm:mr-3 text-blue-500 shrink-0 mt-0.5 sm:mt-0" />,
-      <Scale className="h-5 w-5 mr-2 sm:mr-3 text-blue-500 shrink-0 mt-0.5 sm:mt-0" />,
-      <AlertTriangle className="h-5 w-5 mr-2 sm:mr-3 text-blue-500 shrink-0 mt-0.5 sm:mt-0" />,
-      <FileSignature className="h-5 w-5 mr-2 sm:mr-3 text-blue-500 shrink-0 mt-0.5 sm:mt-0" />,
-      <Briefcase className="h-5 w-5 mr-2 sm:mr-3 text-blue-500 shrink-0 mt-0.5 sm:mt-0" />,
+      <Gavel
+        key="gavel-1"
+        className="h-5 w-5 mr-2 sm:mr-3 text-blue-500 shrink-0 mt-0.5 sm:mt-0"
+      />,
+      <Scale
+        key="scale-1"
+        className="h-5 w-5 mr-2 sm:mr-3 text-blue-500 shrink-0 mt-0.5 sm:mt-0"
+      />,
+      <AlertTriangle
+        key="alert-triangle-3"
+        className="h-5 w-5 mr-2 sm:mr-3 text-blue-500 shrink-0 mt-0.5 sm:mt-0"
+      />,
+      <FileSignature
+        key="file-signature-3"
+        className="h-5 w-5 mr-2 sm:mr-3 text-blue-500 shrink-0 mt-0.5 sm:mt-0"
+      />,
+      <Briefcase
+        key="briefcase-1"
+        className="h-5 w-5 mr-2 sm:mr-3 text-blue-500 shrink-0 mt-0.5 sm:mt-0"
+      />,
     ],
   };
 

@@ -8,7 +8,7 @@ import {
 } from "@/components/ui/popover";
 import { useState } from "react";
 import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
-import { LogOut, Settings, User } from "lucide-react";
+import { LogOut, Settings } from "lucide-react";
 import Link from "next/link";
 import { Separator } from "./ui/separator";
 
