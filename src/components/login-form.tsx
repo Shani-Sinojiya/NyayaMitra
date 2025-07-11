@@ -8,8 +8,8 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
+// import { Input } from "@/components/ui/input";
+// import { Label } from "@/components/ui/label";
 import { ComponentProps, Fragment, useState } from "react";
 import Link from "next/link";
 import { signIn } from "next-auth/react";
@@ -23,7 +23,9 @@ export function LoginForm({ className, ...props }: ComponentProps<"div">) {
       <Card>
         <CardHeader className="text-center">
           <CardTitle className="text-xl">Welcome back</CardTitle>
-          <CardDescription>Login with your Google account</CardDescription>
+          <CardDescription>
+            Login/Signup with your Google account
+          </CardDescription>
         </CardHeader>
         <CardContent>
           <Fragment>
@@ -45,16 +47,16 @@ export function LoginForm({ className, ...props }: ComponentProps<"div">) {
                         fill="currentColor"
                       />
                     </svg>
-                    Login with Google
+                    Login/Signup with Google
                   </Button>
                 </form>
               </div>
-              <div className="after:border-border relative text-center text-sm after:absolute after:inset-0 after:top-1/2 after:z-0 after:flex after:items-center after:border-t">
+              {/* <div className="after:border-border relative text-center text-sm after:absolute after:inset-0 after:top-1/2 after:z-0 after:flex after:items-center after:border-t">
                 <span className="bg-card text-muted-foreground relative z-10 px-2">
                   Or continue with
                 </span>
-              </div>
-              <form
+              </div> */}
+              {/* <form
                 className="grid gap-6"
                 action={(formdata: FormData) => {
                   signIn(
@@ -98,13 +100,13 @@ export function LoginForm({ className, ...props }: ComponentProps<"div">) {
                 <Button type="submit" className="w-full cursor-pointer">
                   Login
                 </Button>
-              </form>
-              <div className="text-center text-sm">
+              </form> */}
+              {/* <div className="text-center text-sm">
                 Don&apos;t have an account?{" "}
                 <Link href="/signup" className="underline underline-offset-4">
                   Sign up
                 </Link>
-              </div>
+              </div> */}
             </div>
           </Fragment>
         </CardContent>

@@ -26,8 +26,8 @@ import {
   useSidebar,
 } from "@/components/ui/sidebar";
 import Link from "next/link";
-import { useEffect, useState } from "react";
 import { Button } from "./ui/button";
+import useSWR from "swr";
 
 type ChatSummary = {
   _id: string;
@@ -37,32 +37,23 @@ type ChatSummary = {
 
 export function NavChatList() {
   const { isMobile } = useSidebar();
-  const [chats, setChats] = useState<ChatSummary[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
 
-  useEffect(() => {
-    const fetchChats = async () => {
-      try {
-        setIsLoading(true);
-        const response = await fetch("/api/chats");
-
-        if (!response.ok) {
-          throw new Error(`Failed to fetch chats: ${response.statusText}`);
-        }
-
-        const data = await response.json();
-        setChats(data);
-      } catch (err) {
-        console.error("Error fetching chats:", err);
-        setError(err instanceof Error ? err.message : "Failed to load chats");
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    fetchChats();
-  }, []);
+  const { data, isLoading, error } = useSWR(
+    "/api/chats",
+    (url): Promise<ChatSummary[] | undefined> =>
+      fetch(url)
+        .then((res) => {
+          if (!res.ok) {
+            throw new Error(`Failed to fetch chats: ${res.statusText}`);
+          }
+          return res.json();
+        })
+        .catch((error) => {
+          console.error("Error fetching chats:", error);
+          return { error: error.message || "Failed to load chats" };
+        }),
+    { refreshInterval: 1000 }
+  );
 
   return (
     <SidebarGroup className="group-data-[collapsible=icon]:hidden">
@@ -83,11 +74,11 @@ export function NavChatList() {
           </div>
         ) : error ? (
           <div className="px-3 py-2 text-sm text-red-500">{error}</div>
-        ) : chats.length === 0 ? (
+        ) : data && data.length === 0 ? (
           <div className="px-3 py-2 text-sm text-gray-500">No chats found</div>
         ) : (
-          chats.map((chat) => (
-            <SidebarMenuItem key={chat._id}>
+          data?.map((chat, index) => (
+            <SidebarMenuItem key={index}>
               <SidebarMenuButton asChild>
                 <Link href={`/chat/${chat.chatid}`}>
                   <span className="truncate">{chat.title}</span>

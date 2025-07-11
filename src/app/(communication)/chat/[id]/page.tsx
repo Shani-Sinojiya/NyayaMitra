@@ -1,8 +1,9 @@
 import React, { Fragment, Suspense } from "react";
 import Header from "../../../header";
-import { notFound } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
 import ClientWrapper from "./client-wrapper";
 import ChatLoader from "./chat-loader";
+import { auth } from "@/auth";
 
 // These Next.js config options ensure the page is always fetched fresh
 export const dynamic = "force-dynamic";
@@ -131,7 +132,16 @@ export async function generateMetadata({
 }
 
 const Page = async ({ params }: { params: Promise<{ id: string }> }) => {
+  const session = await auth();
+
   const chatId = (await params).id;
+
+  if (!session || !session.user) {
+    if (chatId == "new") {
+      return redirect("/login?callbackUrl=/chat/new");
+    }
+    return redirect(`/login`);
+  }
 
   // If the ID is "new", we render an empty chat
   if (chatId === "new") {
