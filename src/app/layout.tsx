@@ -3,6 +3,7 @@ import { ThemeProvider } from "@/components/theme-provider";
 import { WEB_APP_BASENAME, WEB_APP_DESCRIPTION } from "@/constants/web";
 import "./globals.css";
 import { Fragment } from "react";
+import { Toaster } from "@/components/ui/sonner";
 
 export const metadata: Metadata = {
   title: WEB_APP_BASENAME,
@@ -34,6 +35,7 @@ export default function RootLayout({ children }: RootLayoutProps) {
             disableTransitionOnChange
           >
             {children}
+            <Toaster position={"top-center"} />
           </ThemeProvider>
         </body>
       </html>

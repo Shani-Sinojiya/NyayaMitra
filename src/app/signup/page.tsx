@@ -1,15 +1,16 @@
 import { auth } from "@/auth";
 import { LoginForm } from "@/components/login-form";
 import Logo from "@/components/logo";
+import { SignupForm } from "@/components/signup-form";
 import { WEB_APP_BASENAME } from "@/constants/web";
 import { Metadata } from "next";
 import { redirect } from "next/navigation";
 
-export default async function LoginPage() {
-  const session = await auth();
-  if (session) {
-    return redirect("/chat");
-  }
+export default async function SignupPage() {
+  // const session = await auth();
+  // if (session) {
+  //   return redirect("/chat");
+  // }
   return (
     <div className="bg-muted flex min-h-svh flex-col items-center justify-center gap-6 p-6 md:p-10">
       <div className="flex w-full max-w-sm flex-col gap-6">
@@ -19,13 +20,14 @@ export default async function LoginPage() {
           </div>
           {WEB_APP_BASENAME}
         </a>
-        <LoginForm />
+        <SignupForm />
       </div>
     </div>
   );
 }
 
+
 export const metadata: Metadata = {
-  title: "Login | " + WEB_APP_BASENAME,
-  description: "Login to your account to access the application.",
+  title: "Sign Up | " + WEB_APP_BASENAME,
+  description: "Create a new account to access the application.",
 };
