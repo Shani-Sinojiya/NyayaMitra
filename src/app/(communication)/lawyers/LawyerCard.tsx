@@ -32,7 +32,7 @@ export function LawyerCard({ lawyer }: { lawyer: Lawyer }) {
           {/* Basic Info */}
           <div className="flex-1 text-center sm:text-left space-y-1 min-w-0">
             <h3 className="text-lg sm:text-xl font-bold text-foreground truncate">
-              Adv. {lawyer["Full Name"]}
+              {lawyer["Full Name"]}
             </h3>
             <p className="text-sm sm:text-base text-primary font-medium">
               {lawyer.Specialization}
