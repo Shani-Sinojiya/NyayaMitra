@@ -28,7 +28,7 @@ import {
 import Link from "next/link";
 import { Button } from "./ui/button";
 import useSWR from "swr";
-
+import { usePathname } from "next/navigation";
 type ChatSummary = {
   _id: string;
   title: string;
@@ -37,6 +37,7 @@ type ChatSummary = {
 
 export function NavChatList() {
   const { isMobile } = useSidebar();
+  const pathname = usePathname();
 
   const { data, isLoading, error } = useSWR(
     "/api/chats",
@@ -79,7 +80,10 @@ export function NavChatList() {
         ) : (
           data?.map((chat, index) => (
             <SidebarMenuItem key={index}>
-              <SidebarMenuButton asChild>
+              <SidebarMenuButton
+                asChild
+                isActive={pathname === `/chat/${chat.chatid}`}
+              >
                 <Link href={`/chat/${chat.chatid}`}>
                   <span className="truncate">{chat.title}</span>
                 </Link>
@@ -96,7 +100,7 @@ export function NavChatList() {
                   side={isMobile ? "bottom" : "right"}
                   align={isMobile ? "end" : "start"}
                 >
-                  <DropdownMenuItem>
+                  {/* <DropdownMenuItem>
                     <StarOff className="text-muted-foreground" />
                     <span>Add to Favorites</span>
                   </DropdownMenuItem>
@@ -104,16 +108,18 @@ export function NavChatList() {
                   <DropdownMenuItem>
                     <LinkIcon className="text-muted-foreground" />
                     <span>Copy Link</span>
+                  </DropdownMenuItem> */}
+                  <DropdownMenuItem asChild>
+                    <Link href={`/chat/${chat.chatid}`} target="_blank">
+                      <ArrowUpRight className="text-muted-foreground" />
+                      <span>Open in New Tab</span>
+                    </Link>
                   </DropdownMenuItem>
-                  <DropdownMenuItem>
-                    <ArrowUpRight className="text-muted-foreground" />
-                    <span>Open in New Tab</span>
-                  </DropdownMenuItem>
-                  <DropdownMenuSeparator />
-                  <DropdownMenuItem>
+                  {/* <DropdownMenuSeparator /> */}
+                  {/* <DropdownMenuItem>
                     <Trash2 className="text-muted-foreground" />
                     <span>Delete</span>
-                  </DropdownMenuItem>
+                  </DropdownMenuItem> */}
                 </DropdownMenuContent>
               </DropdownMenu>
             </SidebarMenuItem>

@@ -1,6 +1,6 @@
 "use client";
 
-import { Edit3, Mic } from "lucide-react";
+import { Edit3, Mic, User } from "lucide-react";
 import { NavMain } from "@/components/nav-main";
 import {
   Sidebar,
@@ -11,24 +11,34 @@ import {
 import Logo from "./logo";
 import { WEB_APP_BASENAME } from "@/constants/web";
 import { NavChatList } from "./nav-chatlist";
+import { usePathname } from "next/navigation";
 
 // This is sample data.
-const data = {
-  navMain: [
+
+export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
+  const pathname = usePathname();
+
+  const navMain = [
     {
       title: "New Chat",
       url: "/chat/new",
       icon: Edit3,
+      isActive: pathname === "/chat/new",
     },
     {
       title: "Voice Call",
       url: "/voice",
       icon: Mic,
+      isActive: pathname === "/voice",
     },
-  ],
-};
+    {
+      title: "Lawyer Directory",
+      url: "/lawyers",
+      icon: User,
+      isActive: pathname === "/lawyers",
+    },
+  ];
 
-export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   return (
     <Sidebar className="border-r-0" {...props}>
       <SidebarHeader>
@@ -38,7 +48,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
           </div>
           {WEB_APP_BASENAME}
         </div>
-        <NavMain items={data.navMain} />
+        <NavMain items={navMain} />
       </SidebarHeader>
       <SidebarContent>
         <NavChatList />

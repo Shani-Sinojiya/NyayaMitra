@@ -80,7 +80,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
       return token;
     },
   },
-  debug: true,
+  // debug: true,
   cookies: {
     sessionToken: {
       name: "nyayamitra.session-token",
