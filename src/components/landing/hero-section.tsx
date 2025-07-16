@@ -77,7 +77,7 @@ export function HeroSection() {
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.6 }}
-                src="/images/placeholder.svg"
+                src="/Images/placeholder.svg"
                 alt="NyayaMitra helping a rural person"
                 className="w-full max-w-md mx-auto"
               />
