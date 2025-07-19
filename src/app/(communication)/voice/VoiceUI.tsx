@@ -1,6 +1,6 @@
 "use client";
 
-import { Mic, PhoneCall, PhoneOff, X } from "lucide-react";
+import { Mic, PhoneCall, PhoneOff } from "lucide-react";
 import { motion } from "framer-motion";
 import { useEffect, useState, useCallback } from "react";
 import { useRouter } from "next/navigation";
@@ -102,7 +102,7 @@ const VoiceUI = () => {
         {conversation.status === "connected" ? (
           <Button
             variant={"secondary"}
-            className="rounded-full size-14 cursor-pointer"
+            className="rounded-full size-14 cursor-pointer bg-red-600 hover:bg-red-700 text-gray-100"
             onClick={() => {
               if (conversation.status === "connected") {
                 stopConversation();
@@ -111,14 +111,14 @@ const VoiceUI = () => {
               }
             }}
           >
-            <Mic className="!w-6 !h-6" />
+            <PhoneOff className="!w-6 !h-6" />
           </Button>
         ) : null}
 
         {conversation.status === "connecting" ? (
           <Button
             variant={"secondary"}
-            className="rounded-full size-14 cursor-pointer"
+            className="rounded-full size-14 cursor-pointer bg-gray-600 hover:bg-gray-700 text-gray-100"
             onClick={stopConversation}
           >
             <PhoneOff className="!w-6 !h-6" />
@@ -132,16 +132,6 @@ const VoiceUI = () => {
             onClick={startConversation}
           >
             <PhoneCall className="!w-6 !h-6" />
-          </Button>
-        ) : null}
-
-        {conversation.status === "connected" ? (
-          <Button
-            variant={"destructive"}
-            className="rounded-full size-14 cursor-pointer"
-            onClick={() => router.push("/")}
-          >
-            <X className="!w-6 !h-6" />
           </Button>
         ) : null}
       </div>
